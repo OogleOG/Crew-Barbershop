@@ -247,6 +247,10 @@ a{ color:inherit; text-decoration:none; }
 .drawer__meta{ font-size:11px; letter-spacing:.16em; color:var(--ash); text-transform:uppercase; }
 
 /* ─────────────────────────── SHARED TYPE ─────────────────────────── */
+/* Anchor jumps land below the fixed nav instead of tucking the first line
+   of a section underneath it. */
+section[id]{ scroll-margin-top:calc(var(--nav-h) + 20px); }
+
 .h-display{
   font-family:var(--display);
   font-weight:400;
@@ -648,6 +652,21 @@ a{ color:inherit; text-decoration:none; }
   padding:7px 13px; border-radius:999px;
 }
 .barber__body{ padding-top:clamp(20px,2.4vw,30px); }
+
+/* Role labels. Owner reads as the primary chair (filled), trainee as the
+   secondary (outlined) — but both are stated plainly, never implied. */
+.barber__role{
+  display:inline-block;
+  font-size:9.5px; letter-spacing:.28em; text-transform:uppercase; font-weight:500;
+  padding:6px 13px; border-radius:999px;
+  margin-bottom:14px;
+  background:var(--ink); color:var(--paper);
+}
+.barber__role--trainee{
+  background:transparent; color:var(--ink);
+  border:1px solid rgba(8,8,10,.3);
+}
+
 .barber__body h3{
   font-family:var(--display); font-weight:400;
   font-size:clamp(26px,3.2vw,46px); line-height:1.04; letter-spacing:-.01em;
