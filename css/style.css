@@ -679,7 +679,128 @@ section[id]{ scroll-margin-top:calc(var(--nav-h) + 20px); }
 
 @media (max-width:760px){ .crew__grid{ grid-template-columns:1fr; gap:52px; } }
 
-/* ─────────────────────────── 06 · REVIEWS ─────────────────────────── */
+/* ─────────────────────────── 06 · THE SHOP ─────────────────────────── *
+ * Dark ground: breaks the long white run of Menu→Crew→Reviews, and black
+ * and white apparel photographs badly on white.
+ * ──────────────────────────────────────────────────────────────────────── */
+.shop{
+  position:relative; z-index:2;
+  background:var(--ink); color:var(--paper);
+  padding:clamp(90px,12vw,170px) var(--gut) clamp(80px,11vw,150px);
+  border-radius:clamp(24px,3vw,48px) clamp(24px,3vw,48px) 0 0;
+}
+.shop__head{
+  display:grid; grid-template-columns:1.1fr .9fr; gap:clamp(24px,4vw,60px);
+  align-items:end; margin-bottom:clamp(46px,6vw,84px);
+}
+.shop__lead{
+  font-size:clamp(14px,1.5vw,17px); line-height:1.75;
+  color:var(--paper-dim); max-width:42ch; padding-bottom:.6em;
+}
+@media (max-width:860px){ .shop__head{ grid-template-columns:1fr; align-items:start; } }
+
+.shop__grid{
+  display:grid; grid-template-columns:repeat(4,1fr);
+  gap:clamp(14px,1.8vw,30px);
+  perspective:1400px;
+}
+@media (max-width:1080px){ .shop__grid{ grid-template-columns:repeat(2,1fr); } }
+@media (max-width:560px){  .shop__grid{ grid-template-columns:1fr; } }
+
+.product{
+  display:flex; flex-direction:column;
+  opacity:0; transform:translateY(50px);
+  transform-style:preserve-3d;
+}
+.product.in{ opacity:1; transform:none; transition:opacity .9s var(--ease), transform .9s var(--ease); }
+.product:nth-child(2).in{ transition-delay:.08s } .product:nth-child(3).in{ transition-delay:.16s }
+.product:nth-child(4).in{ transition-delay:.24s }
+
+.product__media{
+  position:relative; aspect-ratio:1/1; overflow:hidden;
+  border-radius:clamp(12px,1.3vw,18px);
+  background:var(--ink-soft);
+  box-shadow:0 0 0 1px rgba(246,245,242,.1) inset;
+  transition:transform .7s var(--ease), box-shadow .7s var(--ease);
+}
+.product:hover .product__media{
+  transform:translateZ(38px) rotateX(3deg);
+  box-shadow:0 40px 70px -36px rgba(0,0,0,.8), 0 0 0 1px rgba(246,245,242,.2) inset;
+}
+.product__img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.product__flag{
+  position:absolute; top:14px; left:14px; z-index:3;
+  font-size:9px; letter-spacing:.24em; text-transform:uppercase;
+  background:rgba(8,8,10,.55); backdrop-filter:blur(8px);
+  border:1px solid rgba(246,245,242,.18);
+  padding:6px 11px; border-radius:999px;
+}
+
+.product__body{ padding-top:clamp(16px,1.8vw,22px); display:flex; flex-direction:column; flex:1; }
+.product__body h3{
+  font-family:var(--display); font-weight:400;
+  font-size:clamp(19px,1.9vw,25px); line-height:1.15; letter-spacing:-.01em;
+}
+.product__desc{
+  font-size:12.5px; line-height:1.65; color:var(--ash);
+  margin-top:8px; max-width:32ch;
+}
+.product__row{
+  display:flex; align-items:baseline; gap:12px;
+  margin:14px 0 18px; padding-top:12px; border-top:1px solid var(--line);
+}
+.product__price{ font-family:var(--display); font-size:clamp(20px,2vw,27px); }
+
+/* Size picker — real radios, so keyboard and screen readers work for free */
+.sizes{ border:0; margin:0 0 18px; padding:0; display:flex; gap:7px; flex-wrap:wrap; }
+.sizes label{ cursor:pointer; }
+.sizes input{
+  position:absolute; opacity:0; width:0; height:0;
+}
+.sizes span{
+  display:grid; place-items:center;
+  min-width:42px; height:36px; padding:0 10px;
+  border:1px solid var(--line); border-radius:999px;
+  font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--paper-dim);
+  transition:background .35s var(--ease), color .35s var(--ease), border-color .35s var(--ease);
+}
+.sizes label:hover span{ border-color:rgba(246,245,242,.4); color:var(--paper); }
+.sizes input:checked + span{
+  background:var(--paper); color:var(--ink); border-color:var(--paper);
+}
+.sizes input:focus-visible + span{ outline:2px solid var(--paper); outline-offset:3px; }
+
+/* margin-top:auto pins every buy button to the bottom of its card so they line
+   up across the row regardless of how many size pills a product has. Preceding
+   elements carry the minimum spacing, since an auto margin collapses to 0. */
+.product__buy{ margin-top:auto; width:100%; height:48px; font-size:11px; }
+
+/* Unconfigured = no valid Stripe link yet. Never let it look purchasable. */
+.product.is-unconfigured .product__buy{
+  pointer-events:none; cursor:not-allowed;
+  background:transparent; color:var(--ash); border-color:var(--line);
+}
+.product.is-unconfigured .product__buy::before{ display:none; }
+.product.is-unconfigured .sizes{ opacity:.45; pointer-events:none; }
+
+.shop__note{
+  margin-top:clamp(40px,5vw,64px); padding-top:clamp(22px,3vw,32px);
+  border-top:1px solid var(--line);
+  font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ash);
+  display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+}
+.shop__note b{ color:var(--paper-dim); font-weight:500; }
+.shop__note i{ font-style:normal; opacity:.4; }
+
+/* visually hidden, still announced */
+.vh{
+  position:absolute !important; width:1px; height:1px;
+  padding:0; margin:-1px; overflow:hidden;
+  clip:rect(0 0 0 0); white-space:nowrap; border:0;
+}
+
+/* ─────────────────────────── 07 · REVIEWS ─────────────────────────── */
 .reviews{
   position:relative; z-index:2;
   background:var(--paper); color:var(--ink);

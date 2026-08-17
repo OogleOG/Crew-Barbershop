@@ -63,7 +63,7 @@
 
   /* ─────────────────────────── REVEAL OBSERVER ─────────────────────────── */
   function initReveals() {
-    const targets = $$('[data-reveal], [data-reveal-lines], [data-card], .corridor__cta');
+    const targets = $$('[data-reveal], [data-reveal-lines], [data-card], [data-product], .corridor__cta');
     if (!('IntersectionObserver' in window) || REDUCED) {
       targets.forEach(t => t.classList.add('in'));
       return;
@@ -345,6 +345,64 @@
     });
   }
 
+  /* ─────────────────────────── SHOP ─────────────────────────── *
+   * Each size radio carries its own Stripe Payment Link in data-url; picking
+   * a size just swaps the buy button's href. One-size products put the URL on
+   * the button itself. No cart, no backend, no card data ever touches us.
+   *
+   * A product with no valid https:// link renders as "Coming Soon" and is
+   * unclickable — a half-configured shop must never look purchasable.
+   * ──────────────────────────────────────────────────────────────────────── */
+  function initShop() {
+    $$('[data-product]').forEach(card => {
+      const buy = $('[data-buy]', card);
+      if (!buy) return;
+
+      const radios = $$('input[type="radio"]', card);
+      const labels = $$('.btn__label', buy);
+      const priceEl = $('.product__price', card);
+      const price = priceEl ? priceEl.textContent.trim() : '';
+
+      const apply = () => {
+        const picked = radios.find(r => r.checked);
+        const url = (picked ? picked.dataset.url : buy.dataset.url || '').trim();
+        const live = /^https:\/\/\S+$/.test(url);
+
+        card.classList.toggle('is-unconfigured', !live);
+        buy.href = live ? url : '#';
+        buy.setAttribute('aria-disabled', String(!live));
+        if (live) buy.removeAttribute('tabindex'); else buy.setAttribute('tabindex', '-1');
+
+        const size = picked ? ` (${picked.value})` : '';
+        const text = live ? `Buy${size} — ${price}` : 'Coming Soon';
+        labels.forEach(l => { l.textContent = text; });
+      };
+
+      radios.forEach(r => r.addEventListener('change', apply));
+      buy.addEventListener('click', e => {
+        if (buy.getAttribute('aria-disabled') === 'true') e.preventDefault();
+      });
+      apply();
+    });
+  }
+
+  /* Product photos load the same lazy way the videos do: if the file isn't
+     there, the element is dropped and the procedural art stays visible. */
+  function initProductImages() {
+    const imgs = $$('img[data-src]');
+    if (!imgs.length) return;
+    const load = img => {
+      img.addEventListener('load', () => { img.hidden = false; }, { once: true });
+      img.addEventListener('error', () => img.remove(), { once: true });
+      img.src = img.dataset.src;
+    };
+    if (!('IntersectionObserver' in window)) { imgs.forEach(load); return; }
+    const io = new IntersectionObserver((es) => {
+      es.forEach(e => { if (e.isIntersecting) { load(e.target); io.unobserve(e.target); } });
+    }, { rootMargin: '320px 0px' });
+    imgs.forEach(i => io.observe(i));
+  }
+
   function initYear() {
     const y = $('#yr'); if (y) y.textContent = new Date().getFullYear();
   }
@@ -357,6 +415,8 @@
     initDrawer();
     initTilt();
     initVideo();
+    initShop();
+    initProductImages();
     initReveals();
     measure();
     runPreloader();
